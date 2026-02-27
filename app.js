@@ -307,5 +307,22 @@ addForm.addEventListener("submit", (e) => {
   }
 });
 
+async function generateRecipesFromInventory(selectedItems, preferences) {
+  const res = await fetch("https://TON-WORKER-URL.workers.dev", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      inventory: selectedItems,
+      preferences
+    })
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err?.error || "Recipe API failed");
+  }
+  return await res.json();
+}
+
 wireModalBasics();
 renderBins();
