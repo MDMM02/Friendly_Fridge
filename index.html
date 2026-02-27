@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Friendly Fridge</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="page">
+    <header class="topbar">
+      <div class="title">
+        <div class="logo">🧊</div>
+        <div>
+          <div class="appname">Friendly Fridge</div>
+          <div class="subtitle">Ton inventaire simple, par bacs.</div>
+        </div>
+      </div>
+
+      <div class="temps">
+        <div class="tempRow">
+          <span class="tempLabel"><span class="flake">❄️</span> Congélateur</span>
+          <span class="tempValue" id="freezerTemp">-18°C</span>
+        </div>
+        <div class="tempRow">
+          <span class="tempLabel">Réfrigérateur</span>
+          <span class="tempValue" id="fridgeTemp">4°C</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="main">
+      <section class="fridgeCard" aria-label="Frigo">
+        <div class="fridgeTopGlow"></div>
+
+        <div class="binsGrid" id="binsGrid">
+          <!-- bins injected by JS -->
+        </div>
+
+        <div class="legend">
+          <span class="dot dotRed"></span><span>expire bientôt</span>
+          <span class="spacer"></span>
+          <span class="dot dotYellow"></span><span>dans moins de 5 jours</span>
+        </div>
+
+        <div class="hint">👉 Clique sur un bac pour voir son contenu</div>
+      </section>
+
+      <button class="cta" id="openAddBtn">
+        <span class="plus">＋</span> Ajouter un ingrédient
+      </button>
+    </main>
+  </div>
+
+  <!-- Bin content modal -->
+  <div class="modalOverlay" id="binModal" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="binModalTitle">
+      <div class="modalHeader">
+        <div>
+          <div class="modalTitle" id="binModalTitle">Contenu</div>
+          <div class="modalSubtitle" id="binModalSubtitle"></div>
+        </div>
+        <button class="iconBtn" id="closeBinModal" aria-label="Fermer">✕</button>
+      </div>
+
+      <div class="modalBody">
+        <div class="list" id="binList"></div>
+        <div class="emptyState" id="binEmpty" hidden>
+          Rien ici pour le moment. Ajoute un ingrédient 👇
+        </div>
+      </div>
+
+      <div class="modalFooter">
+        <button class="btnSecondary" id="binModalAddBtn">Ajouter ici</button>
+        <button class="btnPrimary" id="binModalCloseBtn">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add ingredient modal -->
+  <div class="modalOverlay" id="addModal" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="addModalTitle">
+      <div class="modalHeader">
+        <div>
+          <div class="modalTitle" id="addModalTitle">Ajouter un ingrédient</div>
+          <div class="modalSubtitle">Renseigne le bac, la quantité et la validité.</div>
+        </div>
+        <button class="iconBtn" id="closeAddModal" aria-label="Fermer">✕</button>
+      </div>
+
+      <form class="modalBody" id="addForm">
+        <div class="formGrid">
+          <label class="field">
+            <span>Bac</span>
+            <select id="fCategory" required>
+              <option value="vegetables">Légumes</option>
+              <option value="fruits">Fruits</option>
+              <option value="proteins">Protéines</option>
+              <option value="sides">Accompagnements</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Nom</span>
+            <input id="fName" type="text" placeholder="ex: Brocoli" required maxlength="60" />
+          </label>
+
+          <label class="field">
+            <span>Poids / Quantité</span>
+            <input id="fQty" type="text" placeholder="ex: 300g / 2 pièces" required maxlength="40" />
+          </label>
+
+          <label class="field">
+            <span>Validité (date)</span>
+            <input id="fExpiry" type="date" required />
+          </label>
+        </div>
+
+        <div class="microNote">
+          Astuce : tu peux mettre une date “aujourd’hui” si c’est à consommer ASAP.
+        </div>
+
+        <div class="modalFooter">
+          <button type="button" class="btnSecondary" id="addCancelBtn">Annuler</button>
+          <button type="submit" class="btnPrimary">Ajouter</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="./app.js"></script>
+</body>
+</html>
