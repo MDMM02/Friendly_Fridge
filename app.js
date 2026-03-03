@@ -335,7 +335,7 @@ Pour chaque recette :
 
 Utilise sel, poivre, huile et eau si besoin.`;
 
-  const res = await fetch("/api/claude", {
+  const res = await fetch("./netlify/functions/claude-proxy", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
