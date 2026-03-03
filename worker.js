@@ -40,32 +40,32 @@ Keep recipes simple and realistic for a student budget.
       }
     };
 
+   const fullPrompt = system.trim() + "\n\n" + JSON.stringify(user);
+
     const payload = {
-      model: "gpt-4o-mini", // change if you want
-      response_format: { type: "json_object" },
-      temperature: 0.7,
-      messages: [
-        { role: "system", content: system.trim() },
-        { role: "user", content: JSON.stringify(user) }
-      ]
+      contents: [{ parts: [{ text: fullPrompt }] }],
+      generationConfig: {
+        temperature: 0.7,
+        maxOutputTokens: 2000,
+        responseMimeType: "application/json"  // force JSON output natif Gemini
+      }
     };
 
-    const r = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${env.OPENAI_API_KEY}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(payload)
-    });
+     const r = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${env.GEMINI_API_KEY}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      }
+    );
 
     const data = await r.json();
     if (!r.ok) {
       return json({ error: "Model API error", details: data }, 500);
     }
 
-    // The assistant returns JSON as a string in message.content
-    const content = data?.choices?.[0]?.message?.content;
+    const content = data?.candidates?.[0]?.content?.parts?.[0]?.text;
     if (!content) return json({ error: "Empty model response" }, 500);
 
     // validate JSON
