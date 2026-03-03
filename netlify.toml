@@ -1,8 +1,0 @@
-[build]
-  publish = "."                         # ton HTML est à la racine
-  functions = "netlify/functions"       # dossier des fonctions serverless
-
-[[redirects]]
-  from = "/api/claude"
-  to = "/.netlify/functions/claude-proxy"
-  status = 200

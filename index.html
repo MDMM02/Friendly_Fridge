@@ -674,7 +674,7 @@ Sois créatif, chaleureux et encourageant. Utilise uniquement les ingrédients d
     btn.disabled = true;
 
     try {
-      const response = await fetch('/api/claude', {
+      const response = await fetch('/.netlify/functions/claude-proxy', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
