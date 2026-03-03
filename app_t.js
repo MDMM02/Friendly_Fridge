@@ -308,181 +308,21 @@ addForm.addEventListener("submit", (e) => {
 });
 
 async function generateRecipesFromInventory(selectedItems, preferences) {
-  const ingredientList = selectedItems.map(it => `${it.name} (${it.qty})`).join(", ");
-
-  const prompt = `Tu es un chef cuisinier passionné. Génère ${preferences.count || 2} recette(s) avec ces ingrédients du frigo :
-
-**Ingrédients disponibles :** ${ingredientList}
-**Appareils :** ${preferences.appliances?.join(", ") || "four, plaques"}
-**Durée max :** ${preferences.time || 30} minutes
-**Difficulté :** ${preferences.difficulty || "facile"}
-**Régime :** ${preferences.diet || "aucun"}
-
-Pour chaque recette :
-
-## 🍽️ [Nom de la recette]
-**⏱ Temps :** X min | **👨‍🍳 Difficulté :** ${preferences.difficulty || "facile"} | **🍴 Portions :** X pers.
-
-**📝 Ingrédients :**
-- [ingrédient + quantité]
-
-**👨‍🍳 Préparation :**
-1. [étape]
-
-**💡 Astuce du chef :** [conseil]
-
----
-
-Utilise sel, poivre, huile et eau si besoin.`;
-
-  const res = await fetch("/api/claude", {
+  const res = await fetch("https://friendlyfridge.marie-travail38.workers.dev/", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      messages: [{ role: "user", content: prompt }]
+      inventory: selectedItems,
+      preferences
     })
   });
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err?.error || "Erreur génération recettes");
+    throw new Error(err?.error || "Recipe API failed");
   }
-  const data = await res.json();
-  return { text: data.content?.[0]?.text || "Aucune recette générée." };
-}
-
-/* ── RECIPE MODAL ─────────────────────────────────────── */
-function buildRecipeModal() {
-  if (document.getElementById("recipeModal")) return;
-
-  document.head.insertAdjacentHTML("beforeend", `<style>
-    #recipeModal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:1000;opacity:0;pointer-events:none;transition:opacity .25s}
-    #recipeModal.open{opacity:1;pointer-events:all}
-    #recipeModalBox{background:#fff;border-radius:20px;padding:32px;width:min(680px,95vw);max-height:88vh;overflow-y:auto;position:relative;transform:translateY(20px);transition:transform .25s}
-    #recipeModal.open #recipeModalBox{transform:translateY(0)}
-    #recipeModalBox h2{font-size:1.3rem;margin-bottom:4px}
-    #recipeModalBox p.sub{font-size:.82rem;color:#888;margin-bottom:20px}
-    .rPrefRow{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
-    .rPrefRow select{padding:9px 12px;border:1.5px solid #eee;border-radius:10px;font-family:inherit;font-size:.85rem;width:100%}
-    .rAppliances{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
-    .rAppliance{padding:7px 14px;border:1.5px solid #eee;border-radius:20px;font-size:.78rem;cursor:pointer;background:#fafaf8;transition:all .15s}
-    .rAppliance.on{border-color:#2D6A4F;background:#D8F3DC;color:#2D6A4F;font-weight:600}
-    #recipeGenBtn{width:100%;padding:14px;background:linear-gradient(135deg,#2D6A4F,#52B788);color:#fff;border:none;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;margin-bottom:16px}
-    #recipeGenBtn:disabled{opacity:.55;cursor:not-allowed}
-    #recipeOutput{font-size:.92rem;line-height:1.8}
-    #recipeOutput h2{color:#2D6A4F;font-size:1.2rem;margin:20px 0 4px}
-    #recipeOutput strong{color:#2D6A4F}
-    #recipeOutput ul{padding-left:20px;margin:6px 0}
-    #recipeOutput li{margin-bottom:3px}
-    #recipeOutput hr{border:none;border-top:2px dashed #eee;margin:20px 0}
-    .rCloseBtn{position:absolute;top:16px;right:18px;background:none;border:none;font-size:1.4rem;cursor:pointer;color:#aaa}
-    .rLoader{text-align:center;padding:30px;color:#888;font-style:italic}
-    .rDots{display:flex;gap:8px;justify-content:center;margin-bottom:12px}
-    .rDots span{width:9px;height:9px;border-radius:50%;background:#52B788;animation:rBounce 1.2s infinite ease-in-out}
-    .rDots span:nth-child(2){animation-delay:.2s}.rDots span:nth-child(3){animation-delay:.4s}
-    @keyframes rBounce{0%,80%,100%{transform:translateY(0);opacity:.4}40%{transform:translateY(-10px);opacity:1}}
-  </style>`);
-
-  document.body.insertAdjacentHTML("beforeend", `
-    <div id="recipeModal" aria-hidden="true">
-      <div id="recipeModalBox">
-        <button class="rCloseBtn" id="closeRecipeModal">✕</button>
-        <h2>✨ Générer des recettes</h2>
-        <p class="sub">Basé sur les <strong id="rItemCount">0</strong> ingrédients de ton frigo</p>
-        <div class="rPrefRow">
-          <div>
-            <label style="font-size:.78rem;font-weight:600;color:#888;display:block;margin-bottom:5px">Durée max</label>
-            <select id="rTime"><option value="15">15 min</option><option value="30" selected>30 min</option><option value="45">45 min</option><option value="60">1 heure</option></select>
-          </div>
-          <div>
-            <label style="font-size:.78rem;font-weight:600;color:#888;display:block;margin-bottom:5px">Difficulté</label>
-            <select id="rDiff"><option value="facile" selected>Facile</option><option value="moyen">Intermédiaire</option><option value="difficile">Avancé</option></select>
-          </div>
-          <div>
-            <label style="font-size:.78rem;font-weight:600;color:#888;display:block;margin-bottom:5px">Nb de recettes</label>
-            <select id="rCount"><option value="1">1</option><option value="2" selected>2</option><option value="3">3</option></select>
-          </div>
-          <div>
-            <label style="font-size:.78rem;font-weight:600;color:#888;display:block;margin-bottom:5px">Régime</label>
-            <select id="rDiet"><option value="aucun">Aucun</option><option value="végétarien">Végétarien</option><option value="vegan">Vegan</option><option value="sans-gluten">Sans gluten</option></select>
-          </div>
-        </div>
-        <label style="font-size:.78rem;font-weight:600;color:#888;display:block;margin-bottom:8px">Appareils disponibles</label>
-        <div class="rAppliances">
-          <span class="rAppliance on" data-id="four">🔥 Four</span>
-          <span class="rAppliance on" data-id="plaques">🍳 Plaques</span>
-          <span class="rAppliance" data-id="micro-ondes">📡 Micro-ondes</span>
-          <span class="rAppliance" data-id="air-fryer">💨 Air Fryer</span>
-          <span class="rAppliance" data-id="mixeur">🌀 Mixeur</span>
-          <span class="rAppliance" data-id="vapeur">♨️ Vapeur</span>
-        </div>
-        <button id="recipeGenBtn">🍽️ Générer mes recettes</button>
-        <div id="recipeOutput"></div>
-      </div>
-    </div>
-  `);
-
-  document.querySelectorAll(".rAppliance").forEach(el =>
-    el.addEventListener("click", () => el.classList.toggle("on"))
-  );
-  document.getElementById("closeRecipeModal").addEventListener("click", () =>
-    document.getElementById("recipeModal").classList.remove("open")
-  );
-  document.getElementById("recipeModal").addEventListener("click", (e) => {
-    if (e.target === document.getElementById("recipeModal"))
-      document.getElementById("recipeModal").classList.remove("open");
-  });
-  document.getElementById("recipeGenBtn").addEventListener("click", async () => {
-    if (!state.items.length) { alert("Ton frigo est vide !"); return; }
-    const preferences = {
-      time:       document.getElementById("rTime").value,
-      difficulty: document.getElementById("rDiff").value,
-      count:      document.getElementById("rCount").value,
-      diet:       document.getElementById("rDiet").value,
-      appliances: [...document.querySelectorAll(".rAppliance.on")].map(e => e.dataset.id),
-    };
-    const btn = document.getElementById("recipeGenBtn");
-    const output = document.getElementById("recipeOutput");
-    btn.disabled = true;
-    output.innerHTML = `<div class="rLoader"><div class="rDots"><span></span><span></span><span></span></div>L'IA cuisine vos recettes…</div>`;
-    try {
-      const result = await generateRecipesFromInventory(state.items, preferences);
-      output.innerHTML = renderRecipeMarkdown(result.text);
-    } catch (err) {
-      output.innerHTML = `<p style="color:#E76F51">⚠️ ${err.message}</p>`;
-    } finally {
-      btn.disabled = false;
-    }
-  });
-}
-
-function renderRecipeMarkdown(text) {
-  return text
-    .replace(/^## (.+)$/gm, "<h2>$1</h2>")
-    .replace(/^### (.+)$/gm, "<h3>$1</h3>")
-    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
-    .replace(/^---$/gm, "<hr/>")
-    .replace(/^\d+\. (.+)$/gm, "<li>$1</li>")
-    .replace(/^- (.+)$/gm, "<li>$1</li>")
-    .replace(/(<li>[\s\S]*?<\/li>)/g, "<ul>$1</ul>")
-    .replace(/\n{2,}/g, "<br/><br/>");
-}
-
-function openRecipeModal() {
-  buildRecipeModal();
-  document.getElementById("rItemCount").textContent = state.items.length;
-  document.getElementById("recipeOutput").innerHTML = "";
-  document.getElementById("recipeModal").classList.add("open");
-  document.getElementById("recipeModal").setAttribute("aria-hidden", "false");
+  return await res.json();
 }
 
 wireModalBasics();
 renderBins();
-
-// Bouton IA — on l'ajoute après le rendu initial
-const recipeBtn = document.createElement("button");
-recipeBtn.id = "openRecipeBtn";
-recipeBtn.textContent = "✨ Générer des recettes";
-recipeBtn.style.cssText = "display:block;margin:24px auto 0;padding:14px 32px;background:linear-gradient(135deg,#2D6A4F,#52B788);color:#fff;border:none;border-radius:14px;font-size:1rem;font-weight:700;cursor:pointer;letter-spacing:.3px;box-shadow:0 4px 16px rgba(45,106,79,.25)";
-recipeBtn.addEventListener("click", openRecipeModal);
-document.getElementById("binsGrid").insertAdjacentElement("afterend", recipeBtn);

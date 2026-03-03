@@ -1,36 +1,38 @@
 exports.handler = async function (event) {
-  // Only allow POST
   if (event.httpMethod !== "POST") {
     return { statusCode: 405, body: "Method Not Allowed" };
   }
 
   try {
-    const body = JSON.parse(event.body);
+    const { messages } = JSON.parse(event.body);
+    const userMessage = messages[messages.length - 1].content;
 
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": process.env.ANTHROPIC_API_KEY,   // ← clé cachée côté serveur
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
-        max_tokens: 2000,
-        stream: false,                                  // pas de streaming via proxy simple
-        messages: body.messages,
-      }),
-    });
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: userMessage }] }],
+          generationConfig: { maxOutputTokens: 2000 }
+        }),
+      }
+    );
 
     const data = await response.json();
 
+    // Reformatte la réponse au même format pour que le front ne change pas
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "Aucune recette générée.";
+
     return {
-      statusCode: response.status,
+      statusCode: 200,
       headers: {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify({
+        content: [{ text }]
+      }),
     };
   } catch (err) {
     return {
