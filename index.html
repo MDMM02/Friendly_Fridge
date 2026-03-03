@@ -1,133 +1,735 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Friendly Fridge</title>
-  <link rel="stylesheet" href="./styles.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Friendly Fridge — Guide IA</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --cream:    #F9F5EE;
+      --warm:     #EDE8DF;
+      --green:    #2D6A4F;
+      --green-lt: #52B788;
+      --green-xs: #D8F3DC;
+      --amber:    #E76F51;
+      --amber-lt: #F4A261;
+      --text:     #1A1A1A;
+      --muted:    #6B6B5E;
+      --white:    #FFFFFF;
+      --radius:   16px;
+      --shadow:   0 4px 24px rgba(0,0,0,0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--cream);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ─────────────────────────────── */
+    header {
+      background: var(--green);
+      color: var(--white);
+      padding: 28px 40px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    header .logo { font-size: 2rem; }
+    header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.7rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+    header p {
+      font-size: 0.85rem;
+      opacity: 0.75;
+      margin-top: 2px;
+    }
+
+    /* ── MAIN LAYOUT ────────────────────────── */
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+    }
+
+    @media (max-width: 760px) {
+      main { grid-template-columns: 1fr; }
+      header { padding: 20px 20px; }
+    }
+
+    /* ── CARDS ──────────────────────────────── */
+    .card {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 28px;
+      box-shadow: var(--shadow);
+    }
+    .card-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .card-sub {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+
+    /* ── INGREDIENT INPUT ───────────────────── */
+    .input-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .input-row input {
+      flex: 1;
+      padding: 10px 14px;
+      border: 1.5px solid var(--warm);
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      background: var(--cream);
+      transition: border-color 0.2s;
+      outline: none;
+    }
+    .input-row input:focus { border-color: var(--green-lt); }
+    .btn-add {
+      padding: 10px 18px;
+      background: var(--green);
+      color: var(--white);
+      border: none;
+      border-radius: 10px;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .btn-add:hover { background: var(--green-lt); }
+    .btn-add:active { transform: scale(0.95); }
+
+    /* ── TAGS ───────────────────────────────── */
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      min-height: 36px;
+    }
+    .tag {
+      background: var(--green-xs);
+      color: var(--green);
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      animation: popIn 0.2s ease;
+    }
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.8); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+    .tag-remove {
+      cursor: pointer;
+      font-size: 0.9rem;
+      opacity: 0.6;
+      transition: opacity 0.1s;
+    }
+    .tag-remove:hover { opacity: 1; }
+
+    /* ── APPLIANCES GRID ────────────────────── */
+    .appliances-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    .appliance-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      padding: 14px 8px;
+      border: 2px solid var(--warm);
+      border-radius: 12px;
+      background: var(--cream);
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.78rem;
+      color: var(--muted);
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+    .appliance-btn .icon { font-size: 1.6rem; }
+    .appliance-btn:hover {
+      border-color: var(--green-lt);
+      color: var(--green);
+    }
+    .appliance-btn.active {
+      border-color: var(--green);
+      background: var(--green-xs);
+      color: var(--green);
+    }
+
+    /* ── PREFERENCES ────────────────────────── */
+    .pref-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    label.pref-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 5px;
+    }
+    select, .pill-group {
+      width: 100%;
+    }
+    select {
+      padding: 9px 12px;
+      border: 1.5px solid var(--warm);
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 0.85rem;
+      background: var(--cream);
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    select:focus { border-color: var(--green-lt); }
+    .pill-group {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .pill {
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1.5px solid var(--warm);
+      background: var(--cream);
+      font-size: 0.78rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      color: var(--muted);
+    }
+    .pill.active {
+      border-color: var(--amber);
+      background: #FFF3EE;
+      color: var(--amber);
+    }
+    .pill:hover { border-color: var(--amber-lt); color: var(--amber); }
+
+    /* ── GENERATE BUTTON ────────────────────── */
+    .btn-generate {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, var(--green) 0%, var(--green-lt) 100%);
+      color: var(--white);
+      border: none;
+      border-radius: 12px;
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 20px;
+      letter-spacing: 0.3px;
+    }
+    .btn-generate:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
+    .btn-generate:active:not(:disabled) { transform: translateY(0); }
+    .btn-generate:disabled { opacity: 0.55; cursor: not-allowed; }
+
+    /* ── RESULTS PANEL ──────────────────────── */
+    #result-panel {
+      grid-column: 1 / -1;
+      display: none;
+    }
+    #result-panel.visible { display: block; }
+
+    .recipe-output {
+      font-size: 0.95rem;
+      line-height: 1.75;
+      color: var(--text);
+    }
+    .recipe-output h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      color: var(--green);
+      margin: 0 0 6px;
+    }
+    .recipe-output h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      margin: 20px 0 6px;
+      color: var(--text);
+    }
+    .recipe-output ul, .recipe-output ol {
+      padding-left: 22px;
+      margin-bottom: 10px;
+    }
+    .recipe-output li { margin-bottom: 4px; }
+    .recipe-output strong { color: var(--green); }
+    .recipe-output .recipe-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin: 10px 0 18px;
+    }
+    .recipe-meta span {
+      background: var(--warm);
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    .recipe-divider {
+      border: none;
+      border-top: 2px dashed var(--warm);
+      margin: 28px 0;
+    }
+    .recipe-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .recipe-count {
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+    .nav-btns { display: flex; gap: 10px; }
+    .btn-nav {
+      padding: 8px 18px;
+      border: 1.5px solid var(--warm);
+      border-radius: 10px;
+      background: var(--white);
+      font-family: inherit;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-nav:hover { border-color: var(--green-lt); color: var(--green); }
+    .btn-nav:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* ── LOADING ────────────────────────────── */
+    .loader {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      padding: 40px 0;
+    }
+    .loader-dots { display: flex; gap: 8px; }
+    .loader-dots span {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--green);
+      animation: bounce 1.2s infinite ease-in-out;
+    }
+    .loader-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .loader-dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes bounce {
+      0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+      40%            { transform: translateY(-12px); opacity: 1; }
+    }
+    .loader p { font-size: 0.9rem; color: var(--muted); font-style: italic; }
+
+    /* ── EMPTY STATE ────────────────────────── */
+    .empty {
+      text-align: center;
+      padding: 20px 0 10px;
+      color: var(--muted);
+      font-size: 0.85rem;
+      font-style: italic;
+    }
+
+    /* ── ERROR ──────────────────────────────── */
+    .error-msg {
+      background: #FFF0EE;
+      border: 1.5px solid #F4A261;
+      border-radius: 12px;
+      padding: 16px 20px;
+      color: var(--amber);
+      font-size: 0.9rem;
+    }
+
+    /* ── STREAMED TEXT ──────────────────────── */
+    #stream-output {
+      white-space: pre-wrap;
+      font-size: 0.95rem;
+      line-height: 1.8;
+      min-height: 60px;
+    }
+
+    /* ── TYPING CURSOR ──────────────────────── */
+    .cursor {
+      display: inline-block;
+      width: 2px; height: 1em;
+      background: var(--green);
+      vertical-align: text-bottom;
+      animation: blink 0.8s step-end infinite;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    .section-divider {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .section-divider::before, .section-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--warm);
+    }
+  </style>
 </head>
 <body>
-  <div class="page">
-    <header class="topbar">
-      <div class="title">
-        <div class="logo">🧊</div>
-        <div>
-          <div class="appname">Friendly Fridge</div>
-          <div class="subtitle">Ton inventaire simple, par bacs.</div>
-        </div>
+
+<header>
+  <div class="logo">🥦</div>
+  <div>
+    <h1>Friendly Fridge — Guide IA</h1>
+    <p>Des recettes sur-mesure selon votre frigo et vos appareils</p>
+  </div>
+</header>
+
+<main>
+
+  <!-- ── INGRÉDIENTS ─────────────────────── -->
+  <div class="card">
+    <div class="card-title">🧊 Mon Frigo</div>
+    <div class="card-sub">Ajoute tes ingrédients disponibles</div>
+
+    <div class="input-row">
+      <input type="text" id="ingredient-input" placeholder="ex : poulet, tomates, œufs…" autocomplete="off"/>
+      <button class="btn-add" onclick="addIngredient()" title="Ajouter">+</button>
+    </div>
+
+    <div class="tags" id="ingredient-tags">
+      <div class="empty">Aucun ingrédient ajouté</div>
+    </div>
+
+    <!-- Quick adds -->
+    <div style="margin-top:16px;">
+      <div style="font-size:0.78rem;color:var(--muted);font-weight:600;margin-bottom:8px;">SUGGESTIONS RAPIDES</div>
+      <div class="tags" id="quick-tags">
+        <span class="tag" style="cursor:pointer;background:var(--warm);color:var(--muted)" onclick="quickAdd(this)">🥚 Œufs</span>
+        <span class="tag" style="cursor:pointer;background:var(--warm);color:var(--muted)" onclick="quickAdd(this)">🧅 Oignons</span>
+        <span class="tag" style="cursor:pointer;background:var(--warm);color:var(--muted)" onclick="quickAdd(this)">🧄 Ail</span>
+        <span class="tag" style="cursor:pointer;background:var(--warm);color:var(--muted)" onclick="quickAdd(this)">🍅 Tomates</span>
+        <span class="tag" style="cursor:pointer;background:var(--warm);color:var(--muted)" onclick="quickAdd(this)">🥛 Lait</span>
+        <span class="tag" style="cursor:pointer;background:var(--warm);color:var(--muted)" onclick="quickAdd(this)">🧀 Fromage</span>
+        <span class="tag" style="cursor:pointer;background:var(--warm);color:var(--muted)" onclick="quickAdd(this)">🍋 Citron</span>
+        <span class="tag" style="cursor:pointer;background:var(--warm);color:var(--muted)" onclick="quickAdd(this)">🥩 Viande</span>
+        <span class="tag" style="cursor:pointer;background:var(--warm);color:var(--muted)" onclick="quickAdd(this)">🍝 Pâtes</span>
+        <span class="tag" style="cursor:pointer;background:var(--warm);color:var(--muted)" onclick="quickAdd(this)">🍚 Riz</span>
       </div>
+    </div>
+  </div>
 
-      <div class="temps">
-        <div class="tempRow">
-          <span class="tempLabel"><span class="flake">❄️</span> Congélateur</span>
-          <span class="tempValue" id="freezerTemp">-18°C</span>
-        </div>
-        <div class="tempRow">
-          <span class="tempLabel">Réfrigérateur</span>
-          <span class="tempValue" id="fridgeTemp">4°C</span>
-        </div>
-      </div>
-    </header>
+  <!-- ── ÉLECTROMÉNAGER ──────────────────── -->
+  <div class="card">
+    <div class="card-title">🍳 Mon Électroménager</div>
+    <div class="card-sub">Sélectionne les appareils disponibles</div>
 
-    <main class="main">
-      <section class="fridgeCard" aria-label="Frigo">
-        <div class="fridgeTopGlow"></div>
-
-        <div class="binsGrid" id="binsGrid">
-          <!-- bins injected by JS -->
-        </div>
-
-        <div class="legend">
-          <span class="dot dotRed"></span><span>expire bientôt</span>
-          <span class="spacer"></span>
-          <span class="dot dotYellow"></span><span>dans moins de 5 jours</span>
-        </div>
-
-        <div class="hint">👉 Clique sur un bac pour voir son contenu</div>
-      </section>
-
-      <button class="cta" id="openAddBtn">
-        <span class="plus">＋</span> Ajouter un ingrédient
+    <div class="appliances-grid" id="appliances-grid">
+      <button class="appliance-btn active" data-id="four" onclick="toggleAppliance(this)">
+        <span class="icon">🔥</span>Four
       </button>
-    </main>
+      <button class="appliance-btn active" data-id="plaques" onclick="toggleAppliance(this)">
+        <span class="icon">🍳</span>Plaques
+      </button>
+      <button class="appliance-btn" data-id="micro-ondes" onclick="toggleAppliance(this)">
+        <span class="icon">📡</span>Micro-ondes
+      </button>
+      <button class="appliance-btn" data-id="air-fryer" onclick="toggleAppliance(this)">
+        <span class="icon">💨</span>Air Fryer
+      </button>
+      <button class="appliance-btn" data-id="mixeur" onclick="toggleAppliance(this)">
+        <span class="icon">🌀</span>Mixeur
+      </button>
+      <button class="appliance-btn" data-id="robot-culinaire" onclick="toggleAppliance(this)">
+        <span class="icon">🤖</span>Robot
+      </button>
+      <button class="appliance-btn" data-id="grille-pain" onclick="toggleAppliance(this)">
+        <span class="icon">🍞</span>Grille-pain
+      </button>
+      <button class="appliance-btn" data-id="cuiseur-vapeur" onclick="toggleAppliance(this)">
+        <span class="icon">♨️</span>Vapeur
+      </button>
+      <button class="appliance-btn" data-id="barbecue" onclick="toggleAppliance(this)">
+        <span class="icon">🔆</span>Barbecue
+      </button>
+    </div>
+
+    <!-- Préférences -->
+    <div style="margin-top:22px;">
+      <div class="card-title" style="font-size:1rem;margin-bottom:12px;">⚙️ Préférences</div>
+      <div class="pref-grid">
+        <div>
+          <label class="pref-label">Durée max</label>
+          <select id="pref-time">
+            <option value="15">15 min</option>
+            <option value="30" selected>30 min</option>
+            <option value="45">45 min</option>
+            <option value="60">1 heure</option>
+            <option value="90">1h30+</option>
+          </select>
+        </div>
+        <div>
+          <label class="pref-label">Difficulté</label>
+          <select id="pref-difficulty">
+            <option value="facile" selected>Facile</option>
+            <option value="moyen">Intermédiaire</option>
+            <option value="difficile">Avancé</option>
+          </select>
+        </div>
+        <div>
+          <label class="pref-label">Nombre de recettes</label>
+          <select id="pref-count">
+            <option value="1">1 recette</option>
+            <option value="2">2 recettes</option>
+            <option value="3" selected>3 recettes</option>
+          </select>
+        </div>
+        <div>
+          <label class="pref-label">Régime alimentaire</label>
+          <select id="pref-diet">
+            <option value="aucun">Pas de restriction</option>
+            <option value="végétarien">Végétarien</option>
+            <option value="vegan">Vegan</option>
+            <option value="sans-gluten">Sans gluten</option>
+            <option value="sans-lactose">Sans lactose</option>
+          </select>
+        </div>
+      </div>
+
+      <label class="pref-label" style="margin-bottom:8px;">Type de plat</label>
+      <div class="pill-group" id="meal-type">
+        <span class="pill active" data-val="entrée">🥗 Entrée</span>
+        <span class="pill active" data-val="plat">🍽️ Plat</span>
+        <span class="pill active" data-val="dessert">🍰 Dessert</span>
+        <span class="pill" data-val="petit-déjeuner">🌅 Petit-dej</span>
+        <span class="pill" data-val="snack">🫙 Snack</span>
+      </div>
+    </div>
+
+    <button class="btn-generate" id="gen-btn" onclick="generateRecipes()">
+      ✨ Générer mes recettes
+    </button>
   </div>
 
-  <!-- Bin content modal -->
-  <div class="modalOverlay" id="binModal" aria-hidden="true">
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="binModalTitle">
-      <div class="modalHeader">
-        <div>
-          <div class="modalTitle" id="binModalTitle">Contenu</div>
-          <div class="modalSubtitle" id="binModalSubtitle"></div>
-        </div>
-        <button class="iconBtn" id="closeBinModal" aria-label="Fermer">✕</button>
-      </div>
-
-      <div class="modalBody">
-        <div class="list" id="binList"></div>
-        <div class="emptyState" id="binEmpty" hidden>
-          Rien ici pour le moment. Ajoute un ingrédient 👇
-        </div>
-      </div>
-
-      <div class="modalFooter">
-        <button class="btnSecondary" id="binModalAddBtn">Ajouter ici</button>
-        <button class="btnPrimary" id="binModalCloseBtn">OK</button>
-      </div>
+  <!-- ── RÉSULTATS ─────────────────────── -->
+  <div class="card" id="result-panel">
+    <div id="result-content">
+      <!-- Contenu dynamique -->
     </div>
   </div>
 
-  <!-- Add ingredient modal -->
-  <div class="modalOverlay" id="addModal" aria-hidden="true">
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="addModalTitle">
-      <div class="modalHeader">
-        <div>
-          <div class="modalTitle" id="addModalTitle">Ajouter un ingrédient</div>
-          <div class="modalSubtitle">Renseigne le bac, la quantité et la validité.</div>
+</main>
+
+<script>
+  // ── STATE ──────────────────────────────────────────────
+  const ingredients = new Set();
+
+  // ── INGREDIENTS ────────────────────────────────────────
+  function addIngredient() {
+    const input = document.getElementById('ingredient-input');
+    const val = input.value.trim();
+    if (!val) return;
+    val.split(',').map(s => s.trim()).filter(Boolean).forEach(v => {
+      if (v) ingredients.add(v.toLowerCase());
+    });
+    input.value = '';
+    renderTags();
+    input.focus();
+  }
+
+  document.getElementById('ingredient-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') addIngredient();
+  });
+
+  function removeIngredient(name) {
+    ingredients.delete(name);
+    renderTags();
+  }
+
+  function quickAdd(el) {
+    const text = el.textContent.replace(/[\u{1F300}-\u{1FFFF}]/gu, '').trim();
+    ingredients.add(text.toLowerCase());
+    renderTags();
+  }
+
+  function renderTags() {
+    const container = document.getElementById('ingredient-tags');
+    if (ingredients.size === 0) {
+      container.innerHTML = '<div class="empty">Aucun ingrédient ajouté</div>';
+      return;
+    }
+    container.innerHTML = [...ingredients].map(ing =>
+      `<span class="tag">🌿 ${ing} <span class="tag-remove" onclick="removeIngredient('${ing}')">✕</span></span>`
+    ).join('');
+  }
+
+  // ── APPLIANCES ─────────────────────────────────────────
+  function toggleAppliance(btn) {
+    btn.classList.toggle('active');
+  }
+
+  function getActiveAppliances() {
+    return [...document.querySelectorAll('.appliance-btn.active')].map(b => b.dataset.id);
+  }
+
+  // ── MEAL TYPE PILLS ────────────────────────────────────
+  document.querySelectorAll('.pill').forEach(pill => {
+    pill.addEventListener('click', () => pill.classList.toggle('active'));
+  });
+
+  function getActiveMealTypes() {
+    return [...document.querySelectorAll('.pill.active')].map(p => p.dataset.val);
+  }
+
+  // ── GENERATE ───────────────────────────────────────────
+  async function generateRecipes() {
+    if (ingredients.size === 0) {
+      alert('Ajoute au moins un ingrédient dans ton frigo !');
+      return;
+    }
+
+    const appliances = getActiveAppliances();
+    const mealTypes  = getActiveMealTypes();
+    const time       = document.getElementById('pref-time').value;
+    const difficulty = document.getElementById('pref-difficulty').value;
+    const count      = document.getElementById('pref-count').value;
+    const diet       = document.getElementById('pref-diet').value;
+
+    const panel = document.getElementById('result-panel');
+    const content = document.getElementById('result-content');
+    panel.classList.add('visible');
+    panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    content.innerHTML = `
+      <div class="loader">
+        <div class="loader-dots"><span></span><span></span><span></span></div>
+        <p>L'IA cuisine vos recettes… ✨</p>
+      </div>`;
+
+    const prompt = `Tu es un chef cuisinier passionné et créatif. Génère exactement ${count} recette(s) délicieuse(s) en utilisant PRINCIPALEMENT ces ingrédients disponibles :
+
+**Ingrédients disponibles :** ${[...ingredients].join(', ')}
+
+**Appareils disponibles :** ${appliances.length ? appliances.join(', ') : 'aucun appareil spécifique'}
+**Durée maximale :** ${time} minutes
+**Difficulté :** ${difficulty}
+**Type(s) de plat :** ${mealTypes.length ? mealTypes.join(', ') : 'tout type'}
+**Régime alimentaire :** ${diet}
+
+Pour chaque recette, utilise ce format exact :
+
+## 🍽️ [Nom créatif de la recette]
+
+**⏱ Temps :** X min | **👨‍🍳 Difficulté :** ${difficulty} | **🍴 Portions :** X personnes
+
+**📝 Ingrédients :**
+- [ingrédient + quantité]
+
+**👨‍🍳 Préparation :**
+1. [étape]
+
+**💡 Astuce du chef :** [conseil pratique]
+
+---
+
+Sois créatif, chaleureux et encourageant. Utilise uniquement les ingrédients disponibles (tu peux supposer la présence de sel, poivre, huile et eau). Si un ingrédient manque, propose une alternative simple.`;
+
+    const btn = document.getElementById('gen-btn');
+    btn.disabled = true;
+
+    try {
+      const response = await fetch('/api/claude', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [{ role: 'user', content: prompt }]
+        })
+      });
+
+      if (!response.ok) throw new Error(`Erreur API: ${response.status}`);
+
+      const data = await response.json();
+      const fullText = data.content?.[0]?.text || '';
+
+      content.innerHTML = `
+        <div class="card-title" style="margin-bottom:16px;">✨ Vos recettes personnalisées</div>
+        <div class="recipe-output">${renderMarkdown(fullText)}</div>
+      `;
+
+      // Add regenerate button
+      content.insertAdjacentHTML('beforeend', `
+        <div style="margin-top:28px;display:flex;gap:12px;flex-wrap:wrap">
+          <button class="btn-generate" style="width:auto;padding:12px 28px" onclick="generateRecipes()">
+            🔄 Nouvelles recettes
+          </button>
+          <button class="btn-nav" onclick="window.print()">🖨️ Imprimer</button>
         </div>
-        <button class="iconBtn" id="closeAddModal" aria-label="Fermer">✕</button>
-      </div>
+      `);
 
-      <form class="modalBody" id="addForm">
-        <div class="formGrid">
-          <label class="field">
-            <span>Bac</span>
-            <select id="fCategory" required>
-              <option value="vegetables">Légumes</option>
-              <option value="fruits">Fruits</option>
-              <option value="proteins">Protéines</option>
-              <option value="sides">Accompagnements</option>
-            </select>
-          </label>
+    } catch (err) {
+      content.innerHTML = `
+        <div class="error-msg">
+          ⚠️ <strong>Oups !</strong> Impossible de générer les recettes.<br>
+          <small style="opacity:0.8">${err.message}</small>
+        </div>`;
+    } finally {
+      btn.disabled = false;
+    }
+  }
 
-          <label class="field">
-            <span>Nom</span>
-            <input id="fName" type="text" placeholder="ex: Brocoli" required maxlength="60" />
-          </label>
+  // ── SIMPLE MARKDOWN RENDERER ───────────────────────────
+  function renderMarkdown(text) {
+    return text
+      .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+      .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/^---$/gm, '<hr class="recipe-divider"/>')
+      .replace(/^\d+\. (.+)$/gm, '<li>$1</li>')
+      .replace(/^- (.+)$/gm, '<li>$1</li>')
+      .replace(/(<li>.*<\/li>\n?)+/g, match => {
+        const isOrdered = /^\d/.test(text.slice(text.indexOf(match.split('<li>')[1])-2,text.indexOf(match.split('<li>')[1])));
+        return `<ul>${match}</ul>`;
+      })
+      .replace(/\n{2,}/g, '</p><p>')
+      .replace(/^(?!<[huo]|<li|<hr|<p)(.*)/gm, '$1');
+  }
+</script>
 
-          <label class="field">
-            <span>Poids / Quantité</span>
-            <input id="fQty" type="text" placeholder="ex: 300g / 2 pièces" required maxlength="40" />
-          </label>
-
-          <label class="field">
-            <span>Validité (date)</span>
-            <input id="fExpiry" type="date" required />
-          </label>
-        </div>
-
-        <div class="microNote">
-          Astuce : tu peux mettre une date “aujourd’hui” si c’est à consommer ASAP.
-        </div>
-
-        <div class="modalFooter">
-          <button type="button" class="btnSecondary" id="addCancelBtn">Annuler</button>
-          <button type="submit" class="btnPrimary">Ajouter</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <script src="./app.js"></script>
 </body>
 </html>

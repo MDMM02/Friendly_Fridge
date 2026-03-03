@@ -308,7 +308,7 @@ addForm.addEventListener("submit", (e) => {
 });
 
 async function generateRecipesFromInventory(selectedItems, preferences) {
-  const res = await fetch("https://TON-WORKER-URL.workers.dev", {
+  const res = await fetch("https://friendlyfridge.marie-travail38.workers.dev/", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
